@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.nerdnudge.utils.commons.Utilities;
 import com.neurospark.nerdnudge.couchbase.service.NerdPersistClient;
 
 import java.io.*;
@@ -27,7 +28,7 @@ public class QuotesUploader {
         QuotesUploader quotesUploader = new QuotesUploader();
         try {
             quotesUploader.updateConfigurations(configFile);
-            quotesUploader.connectPersist();
+            quotesUploader.quotesPersistClient = Utilities.getQuotesPersistClient();
             quotesUploader.uploadQuotes();
             Thread.sleep(4000);
         }
@@ -147,7 +148,7 @@ public class QuotesUploader {
 
     private void updateConfigurations(final String configFileName) {
         QuotesUploaderConfiguration quotesUploaderConfiguration = QuotesUploaderConfiguration.getInstance();
-        Properties properties = getMigrationProperties(configFileName);
+        Properties properties = Utilities.getMigrationProperties(configFileName);
 
         quotesUploaderConfiguration.setQuotesInputFile(properties.getProperty("QUOTES_INPUT_FILE"));
         quotesUploaderConfiguration.setQuotesDocumentId(properties.getProperty("QUOTES_DOCUMENT_ID"));
@@ -169,18 +170,5 @@ public class QuotesUploader {
                 quotesUploaderConfiguration.getPersistScopeName(),
                 quotesUploaderConfiguration.getPersistCollectionName()
         );
-    }
-
-    private Properties getMigrationProperties(final String configFileName) {
-        Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream(configFileName)) {
-            properties.load(fis);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return properties;
     }
 }
