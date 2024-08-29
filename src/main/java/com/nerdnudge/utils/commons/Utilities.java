@@ -2,6 +2,7 @@ package com.nerdnudge.utils.commons;
 
 import com.nerdnudge.utils.quizflex.QuizflexUploaderConfiguration;
 import com.nerdnudge.utils.quotes.QuotesUploaderConfiguration;
+import com.nerdnudge.utils.users.UserUploaderConfiguration;
 import com.neurospark.nerdnudge.couchbase.service.NerdPersistClient;
 
 import java.io.*;
@@ -44,6 +45,20 @@ public class Utilities {
                 quizflexUploaderConfiguration.getPersistBucketName(),
                 quizflexUploaderConfiguration.getPersistScopeName(),
                 quizflexUploaderConfiguration.getPersistCollectionName()
+        );
+
+        return nerdPersistClient;
+    }
+
+    public static NerdPersistClient getUserPersistClient() {
+        UserUploaderConfiguration userUploaderConfiguration = UserUploaderConfiguration.getInstance();
+        NerdPersistClient nerdPersistClient = new NerdPersistClient(
+                userUploaderConfiguration.getPersistAddress(),
+                userUploaderConfiguration.getPersistUsername(),
+                userUploaderConfiguration.getPersistPassword(),
+                userUploaderConfiguration.getPersistBucketName(),
+                userUploaderConfiguration.getPersistScopeName(),
+                userUploaderConfiguration.getPersistCollectionName()
         );
 
         return nerdPersistClient;
