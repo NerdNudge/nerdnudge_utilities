@@ -1,5 +1,6 @@
 package com.nerdnudge.utils.commons;
 
+import com.nerdnudge.utils.persistbackups.PersistDataManagerConfiguration;
 import com.nerdnudge.utils.quizflex.QuizflexUploaderConfiguration;
 import com.nerdnudge.utils.quotes.QuotesUploaderConfiguration;
 import com.nerdnudge.utils.users.UserUploaderConfiguration;
@@ -59,6 +60,34 @@ public class Utilities {
                 userUploaderConfiguration.getPersistBucketName(),
                 userUploaderConfiguration.getPersistScopeName(),
                 userUploaderConfiguration.getPersistCollectionName()
+        );
+
+        return nerdPersistClient;
+    }
+
+    public static NerdPersistClient getPersistDataManagerSourceClient() {
+        PersistDataManagerConfiguration persistDataManagerConfiguration = PersistDataManagerConfiguration.getInstance();
+        NerdPersistClient nerdPersistClient = new NerdPersistClient(
+                persistDataManagerConfiguration.getPersistAddressSource(),
+                persistDataManagerConfiguration.getPersistUsernameSource(),
+                persistDataManagerConfiguration.getPersistPasswordSource(),
+                persistDataManagerConfiguration.getPersistBucketNameSource(),
+                persistDataManagerConfiguration.getPersistScopeNameSource(),
+                persistDataManagerConfiguration.getPersistCollectionNameSource()
+        );
+
+        return nerdPersistClient;
+    }
+
+    public static NerdPersistClient getPersistDataManagerDestinationClient() {
+        PersistDataManagerConfiguration persistDataManagerConfiguration = PersistDataManagerConfiguration.getInstance();
+        NerdPersistClient nerdPersistClient = new NerdPersistClient(
+                persistDataManagerConfiguration.getPersistAddressDestination(),
+                persistDataManagerConfiguration.getPersistUsernameDestination(),
+                persistDataManagerConfiguration.getPersistPasswordDestination(),
+                persistDataManagerConfiguration.getPersistBucketNameDestination(),
+                persistDataManagerConfiguration.getPersistScopeNameDestination(),
+                persistDataManagerConfiguration.getPersistCollectionNameDestination()
         );
 
         return nerdPersistClient;
