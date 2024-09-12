@@ -47,7 +47,13 @@ public class QuizflexUploader {
             for (int j = 0; j < quizFlexCurrentArray.size(); j++) {
                 JsonObject currentQuizflex = quizFlexCurrentArray.get(j).getAsJsonObject();
                 String quizflexId = currentQuizflex.get("id").getAsString();
+                currentQuizflex.addProperty("topic_name", quizflexUploaderConfiguration.getTopicName());
                 currentQuizflex.addProperty("sub_topic", quizflexUploaderConfiguration.getSubtopic());
+
+                if(! quizflexUploaderConfiguration.getIdPrefixReplacementKey().equalsIgnoreCase("NA"))
+                    quizflexId = quizflexId.replace(quizflexUploaderConfiguration.getIdPrefixReplacementKey(), quizflexUploaderConfiguration.getIdPrefixReplacementWith());
+
+                currentQuizflex.addProperty("id", quizflexId);
                 quizflexPersistClient.set(quizflexId, currentQuizflex);
                 count ++;
             }
@@ -61,11 +67,14 @@ public class QuizflexUploader {
 
         quizflexUploaderConfiguration.setQuizflexInputFile(properties.getProperty("QUIZFLEX_INPUT_FILE"));
         quizflexUploaderConfiguration.setSubtopic(properties.getProperty("QUIZFLEX_SUBTOPIC"));
+        quizflexUploaderConfiguration.setTopicName(properties.getProperty("QUIZFLEX_TOPIC"));
         quizflexUploaderConfiguration.setPersistAddress(properties.getProperty("PERSIST_ADDRESS"));
         quizflexUploaderConfiguration.setPersistUsername(properties.getProperty("PERSIST_USERNAME"));
         quizflexUploaderConfiguration.setPersistPassword(properties.getProperty("PERSIST_PASSWORD"));
         quizflexUploaderConfiguration.setPersistBucketName(properties.getProperty("PERSIST_BUCKET"));
         quizflexUploaderConfiguration.setPersistScopeName(properties.getProperty("PERSIST_SCOPE"));
         quizflexUploaderConfiguration.setPersistCollectionName(properties.getProperty("PERSIST_COLLECTION"));
+        quizflexUploaderConfiguration.setIdPrefixReplacementKey(properties.getProperty("QUIZFLEX_ID_PREFIX_REPLACEMENT_KEY"));
+        quizflexUploaderConfiguration.setIdPrefixReplacementWith(properties.getProperty("QUIZFLEX_ID_PREFIX_REPLACE_WITH"));
     }
 }

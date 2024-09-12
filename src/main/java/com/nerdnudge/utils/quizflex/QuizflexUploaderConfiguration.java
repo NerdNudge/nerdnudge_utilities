@@ -11,7 +11,10 @@ public class QuizflexUploaderConfiguration {
     private String persistScopeName;
     private String persistCollectionName;
     private String quizflexInputFile;
+    private String topicName;
     private String subtopic;
+    private String idPrefixReplacementKey;
+    private String idPrefixReplacementWith;
 
     private static QuizflexUploaderConfiguration quizflexUploaderConfiguration = null;
 
