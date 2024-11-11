@@ -7,10 +7,11 @@ import com.nerdnudge.utils.commons.Utilities;
 import com.neurospark.nerdnudge.couchbase.service.NerdPersistClient;
 
 import java.io.*;
-import java.util.Properties;
+import java.util.*;
 
 public class QuizflexUploader {
     private NerdPersistClient quizflexPersistClient;
+    private Set<String> quizflexSuplicateTracker = null;
 
     public static void main(String[] args) {
         if(args.length == 0) {
@@ -21,11 +22,12 @@ public class QuizflexUploader {
         System.out.println("--------------------NERD NUDGE QUIZFLEX UPLOAD -> START--------------------");
         String configFile = args[0];
         QuizflexUploader quizflexUploader = new QuizflexUploader();
+        quizflexUploader.quizflexSuplicateTracker = new HashSet<>();
         try {
             quizflexUploader.updateConfigurations(configFile);
             quizflexUploader.quizflexPersistClient = Utilities.getQuizflexPersistClient();
             quizflexUploader.uploadQuizflex();
-            Thread.sleep(4000);
+            Thread.sleep(8000);
         }
         catch (Exception ex) {
             System.out.println("[ERROR] Issue Uploading Quotes");
@@ -42,11 +44,19 @@ public class QuizflexUploader {
         JsonObject inputObject = (JsonObject) new JsonParser().parse(inputFileContents);
         JsonArray quizFlexMainArray = inputObject.get("quixflex").getAsJsonArray();
         int count = 0;
+        int duplicates = 0;
         for (int i = 0; i < quizFlexMainArray.size(); i++) {
             JsonArray quizFlexCurrentArray = quizFlexMainArray.get(i).getAsJsonArray();
             for (int j = 0; j < quizFlexCurrentArray.size(); j++) {
+                count ++;
                 JsonObject currentQuizflex = quizFlexCurrentArray.get(j).getAsJsonObject();
                 String quizflexId = currentQuizflex.get("id").getAsString();
+
+                if(isDuplicate(currentQuizflex)) {
+                    duplicates ++;
+                    continue;
+                }
+
                 currentQuizflex.addProperty("topic_name", quizflexUploaderConfiguration.getTopicName());
                 currentQuizflex.addProperty("sub_topic", quizflexUploaderConfiguration.getSubtopic());
 
@@ -55,10 +65,21 @@ public class QuizflexUploader {
 
                 currentQuizflex.addProperty("id", quizflexId);
                 quizflexPersistClient.set(quizflexId, currentQuizflex);
-                count ++;
             }
         }
         System.out.println("Uploaded " + count + " quizflexes for subtopic: " + quizflexUploaderConfiguration.getSubtopic());
+        System.out.println("Num Duplicates: " + duplicates);
+    }
+
+    private boolean isDuplicate(JsonObject currentQuizflex) {
+        String question = currentQuizflex.get("question").getAsString();
+        String title = currentQuizflex.get("title").getAsString();
+
+        if(quizflexSuplicateTracker.contains(title + ":" + question))
+            return true;
+
+        quizflexSuplicateTracker.add(title + ":" + question);
+        return false;
     }
 
     private void updateConfigurations(final String configFileName) {
