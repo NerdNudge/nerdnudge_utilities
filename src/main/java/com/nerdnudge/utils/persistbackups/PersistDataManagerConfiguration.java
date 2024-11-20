@@ -19,6 +19,7 @@ public class PersistDataManagerConfiguration {
     private String persistCollectionNameDestination;
 
     private String operation;
+    private boolean isDeduplicationNeeded;
 
     private static PersistDataManagerConfiguration quizflexUploaderConfiguration = null;
 

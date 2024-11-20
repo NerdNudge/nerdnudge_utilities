@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import com.nerdnudge.utils.commons.Utilities;
 import com.neurospark.nerdnudge.couchbase.service.NerdPersistClient;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PersistDataTransfer {
 
@@ -14,6 +16,7 @@ public class PersistDataTransfer {
     private PersistDataManagerConfiguration persistDataManagerConfiguration;
     private JsonParser jsonParser = new JsonParser();
     private int pageSize = 5000;
+    private Set<String> duplicateTracker = new HashSet<>();
 
     public void transferData() {
         persistDataManagerConfiguration = PersistDataManagerConfiguration.getInstance();
@@ -25,6 +28,7 @@ public class PersistDataTransfer {
         int documentCount = 0;
         int jsonDocuments = 0;
         int counters = 0;
+        int duplicateCount = 0;
 
         for (int k = 1; k <= totalPages; k++) {
             int offset = (k - 1) * pageSize;
@@ -37,8 +41,12 @@ public class PersistDataTransfer {
                 try {
                     JsonObject sourceDocument = sourcePersistClient.get(documentId);
                     if(sourceDocument != null) {
-                        destinationPersistClient.set(documentId, sourceDocument);
                         jsonDocuments ++;
+                        if(persistDataManagerConfiguration.isDeduplicationNeeded() && isDuplicate(sourceDocument)) {
+                            duplicateCount ++;
+                            continue;
+                        }
+                        destinationPersistClient.set(documentId, sourceDocument);
                     }
                     else {
                         long sourceCounterValue = sourcePersistClient.getCounter(documentId);
@@ -53,10 +61,28 @@ public class PersistDataTransfer {
             }
         }
         System.out.println("TRANSFERRED TOTAL " + documentCount + " DOCUMENTS.");
+        System.out.println("DUPLICATE DOCUMENTS IGNORED: " + duplicateCount);
 
         System.out.println("Transferred " + jsonDocuments + " Json Documents.");
         System.out.println("Transferred " + counters + " Counters.");
     }
+
+
+    private boolean isDuplicate(JsonObject currentQuizflex) {
+        if(! currentQuizflex.has("question")) {
+            System.out.println("Something wrong with the doc: " + currentQuizflex);
+            return true;
+        }
+        String question = currentQuizflex.get("question").getAsString();
+        String title = currentQuizflex.get("title").getAsString();
+
+        if(duplicateTracker.contains(title + ":" + question))
+            return true;
+
+        duplicateTracker.add(title + ":" + question);
+        return false;
+    }
+
 
     private String getCountsQuery() {
         StringBuilder queryBuilder = new StringBuilder();

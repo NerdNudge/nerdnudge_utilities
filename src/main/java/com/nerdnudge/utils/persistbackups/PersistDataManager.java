@@ -48,5 +48,6 @@ public class PersistDataManager {
         persistDataManagerConfiguration.setPersistCollectionNameDestination(properties.getProperty("PERSIST_COLLECTION_DESTINATION"));
 
         persistDataManagerConfiguration.setOperation(properties.getProperty("PERSIST_OPERATION"));
+        persistDataManagerConfiguration.setDeduplicationNeeded(Boolean.parseBoolean(properties.getProperty("DEDUPLICATION_NEEDED")));
     }
 }
